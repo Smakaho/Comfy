@@ -16,7 +16,7 @@ Search for "ComfyUI-SEGA" in ComfyUI Manager and install.
 ### Method 2: Manual Install
 ```bash
 cd ComfyUI/custom_nodes/
-git clone https://github.com/Smakaho/comfy/comfyui-sega.git
+git clone https://github.com/Smakaho/Comfy.git
 ```
 
 ### Method 3: Graydient.AI Workflow Builder
