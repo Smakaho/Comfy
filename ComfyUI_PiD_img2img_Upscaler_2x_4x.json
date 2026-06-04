@@ -1,0 +1,319 @@
+{
+  "last_node_id": 147,
+  "last_link_id": 264,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [30, 30],
+      "size": [380, 100],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [1], "slot_index": 0},
+        {"name": "CLIP", "type": "CLIP", "links": [2, 3], "slot_index": 1},
+        {"name": "VAE", "type": "VAE", "links": [4, 5], "slot_index": 2}
+      ],
+      "widgets_values": ["flux1-dev.safetensors"],
+      "title": "Load Flux Checkpoint"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [30, 180],
+      "size": [380, 500],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [6], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": [], "slot_index": 1}
+      ],
+      "widgets_values": ["example.png", "image"],
+      "title": "Load Image (Input)"
+    },
+    {
+      "id": 3,
+      "type": "VAEEncode",
+      "pos": [490, 180],
+      "size": [280, 50],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "pixels", "type": "IMAGE", "link": 6},
+        {"name": "vae", "type": "VAE", "link": 4}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [7], "slot_index": 0}
+      ],
+      "title": "VAE Encode (img2img)"
+    },
+    {
+      "id": 4,
+      "type": "PiDTextPrompt",
+      "pos": [30, 750],
+      "size": [380, 160],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "text", "type": "STRING", "links": [8], "slot_index": 0},
+        {"name": "caption", "type": "STRING", "links": [9], "slot_index": 1}
+      ],
+      "widgets_values": [
+        "professional photography, highly detailed, sharp focus, ultra high quality, 8k uhd",
+        "professional photography, highly detailed, sharp focus, ultra high quality"
+      ],
+      "title": "PiD Text Prompt"
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [490, 30],
+      "size": [320, 120],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [10], "slot_index": 0}
+      ],
+      "widgets_values": ["professional photography, highly detailed, sharp focus, ultra high quality, 8k uhd, crisp textures, photorealistic"],
+      "title": "CLIP Text Encode (Positive)"
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [490, 180],
+      "size": [320, 120],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 3}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [11], "slot_index": 0}
+      ],
+      "widgets_values": ["text, watermark, signature, blurry, low quality, deformed, ugly, bad anatomy, noise, grain, jpeg artifacts"],
+      "title": "CLIP Text Encode (Negative)"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [860, 30],
+      "size": [340, 320],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 10},
+        {"name": "negative", "type": "CONDITIONING", "link": 11},
+        {"name": "latent_image", "type": "LATENT", "link": 7}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [12], "slot_index": 0}
+      ],
+      "widgets_values": [8675309, "randomize", 20, 8, "euler", "normal", 0.35],
+      "title": "KSampler (img2img denoise=0.35)"
+    },
+    {
+      "id": 8,
+      "type": "PiDDecode",
+      "pos": [1260, 30],
+      "size": [380, 560],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "latent", "type": "LATENT", "link": 12},
+        {"name": "caption", "type": "STRING", "link": 9},
+        {"name": "vae", "type": "VAE", "link": null},
+        {"name": "baseline_image", "type": "IMAGE", "link": null},
+        {"name": "pid_source_dir", "type": "STRING", "link": null}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [13], "slot_index": 0}
+      ],
+      "widgets_values": [
+        "flux",
+        "2k",
+        4,
+        4,
+        1.0,
+        0.0,
+        true,
+        true,
+        true,
+        "disabled"
+      ],
+      "title": "PiD Decode 4X (512->2048)"
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [1700, 30],
+      "size": [400, 280],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 13}
+      ],
+      "outputs": [],
+      "widgets_values": ["PiD_img2img_4x"],
+      "title": "Save Image 4X Output"
+    },
+    {
+      "id": 10,
+      "type": "PiDDecode",
+      "pos": [1260, 650],
+      "size": [380, 560],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "latent", "type": "LATENT", "link": 12},
+        {"name": "caption", "type": "STRING", "link": 9},
+        {"name": "vae", "type": "VAE", "link": null},
+        {"name": "baseline_image", "type": "IMAGE", "link": null},
+        {"name": "pid_source_dir", "type": "STRING", "link": null}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [14], "slot_index": 0}
+      ],
+      "widgets_values": [
+        "flux",
+        "2k",
+        4,
+        2,
+        1.0,
+        0.0,
+        true,
+        true,
+        true,
+        "disabled"
+      ],
+      "title": "PiD Decode 2X (512->1024)"
+    },
+    {
+      "id": 11,
+      "type": "SaveImage",
+      "pos": [1700, 650],
+      "size": [400, 280],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 14}
+      ],
+      "outputs": [],
+      "widgets_values": ["PiD_img2img_2x"],
+      "title": "Save Image 2X Output"
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [30, 980],
+      "size": [500, 520],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "widgets_values": [
+        "=== IMAGE-TO-IMAGE PiD UPSCALER v1.0 ===\n\nWORKFLOW: Load Image -> VAE Encode -> KSampler (img2img) -> PiD Decode -> Save\n\n--- UPSCALE OPTIONS ---\n\nThis workflow outputs BOTH 2X and 4X simultaneously.\nPick the one you want, or use both.\n\n4X MODE (Top branch):\n  Input: 512x512 image\n  KSampler latent -> PiD Decode (scale=4)\n  Output: 2048x2048\n  Node: 'PiD Decode 4X (512->2048)'\n\n2X MODE (Bottom branch):\n  Input: 512x512 image\n  KSampler latent -> PiD Decode (scale=2)\n  Output: 1024x1024\n  Node: 'PiD Decode 2X (512->1024)'\n\n--- CUSTOM INPUT SIZES ---\n\nFor non-512 inputs, PiD scale works as:\n  Input 256x256 + scale 4 -> 1024x1024\n  Input 512x512 + scale 4 -> 2048x2048\n  Input 512x512 + scale 2 -> 1024x1024\n  Input 1024x1024 + scale 4 -> 4096x4096 (use 2kto4k ckpt)\n\n--- REQUIRED MODELS ---\n\n1. PiD 2K Checkpoint:\n   https://huggingface.co/nvidia/PiD/tree/main/checkpoints/PiD_res2k_sr4x_official_flux_distill_4step\n\n2. PiD 2K-to-4K Checkpoint (for 1024->4096):\n   https://huggingface.co/nvidia/PiD/tree/main/checkpoints/PiD_res2kto4k_sr4x_official_flux_distill_4step\n\n3. Flux VAE (optional fallback):\n   https://huggingface.co/nvidia/PiD/blob/main/checkpoints/ae.safetensors\n\n4. Flux Checkpoint (place in ComfyUI/models/checkpoints):\n   https://huggingface.co/black-forest-labs/FLUX.1-dev\n\n5. ComfyUI-PiD Custom Node:\n   https://github.com/Merserk/ComfyUI-PiD\n   Install: cd ComfyUI/custom_nodes &&\n   git clone https://github.com/Merserk/ComfyUI-PiD.git &&\n   cd ComfyUI-PiD && pip install -r requirements.txt\n\n--- TIPS ---\n\n- denoise=0.35: Gentle img2img, preserves composition, enhances details\n- Increase denoise to 0.5-0.6 for more creative variation\n- Decrease denoise to 0.2-0.3 for subtle enhancement only\n- Set auto_download=true to fetch PiD checkpoints automatically\n- Expected VRAM: ~13GB for 4X at 512 base\n- Use sequential_offload if OOM errors occur"
+      ],
+      "title": "README - Image-to-Image PiD Upscaler"
+    },
+    {
+      "id": 21,
+      "type": "Note",
+      "pos": [860, 420],
+      "size": [340, 220],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "widgets_values": [
+        "=== KSampler Settings ===\n\nseed: 8675309 (change or set to 'randomize')\nsteps: 20\ncfg: 8.0\nsampler: euler\nscheduler: normal\n\nCRITICAL: denoise=0.35\n\nThis is the img2img strength.\n\n0.0 = no change (pointless)\n0.35 = gentle enhancement (recommended)\n0.5 = moderate change\n0.75 = heavy change\n1.0 = complete redraw"
+      ],
+      "title": "KSampler Settings Guide"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 7, 0, "MODEL"],
+    [2, 1, 1, 5, 0, "CLIP"],
+    [3, 1, 1, 6, 0, "CLIP"],
+    [4, 1, 2, 3, 1, "VAE"],
+    [5, 1, 2, 8, 2, "VAE"],
+    [6, 2, 0, 3, 0, "IMAGE"],
+    [7, 3, 0, 7, 3, "LATENT"],
+    [8, 4, 0, 5, 0, "STRING"],
+    [9, 4, 1, 8, 1, "STRING"],
+    [10, 5, 0, 7, 1, "CONDITIONING"],
+    [11, 6, 0, 7, 2, "CONDITIONING"],
+    [12, 7, 0, 8, 0, "LATENT"],
+    [13, 8, 0, 9, 0, "IMAGE"],
+    [14, 10, 0, 11, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 1, "offset": [0, 0]},
+    "info": {
+      "name": "PiD Image-to-Image Upscaler (2X + 4X)",
+      "author": "PiD Community",
+      "description": "Image-to-image upscaler using NVIDIA PiD pixel diffusion decoder. Loads an image, encodes to latent, runs gentle img2img KSampler (denoise=0.35), then PiD-decodes to both 2X and 4X outputs simultaneously. Supports Flux, Z-Image, SD3 backbones.",
+      "version": "1.0",
+      "created": "2025-05-27",
+      "node_extensions": [
+        {
+          "name": "ComfyUI-PiD",
+          "url": "https://github.com/Merserk/ComfyUI-PiD",
+          "install_command": "cd ComfyUI/custom_nodes && git clone https://github.com/Merserk/ComfyUI-PiD.git && cd ComfyUI-PiD && pip install -r requirements.txt"
+        }
+      ],
+      "models": [
+        {
+          "name": "PiD 2K Flux Checkpoint",
+          "url": "https://huggingface.co/nvidia/PiD/tree/main/checkpoints/PiD_res2k_sr4x_official_flux_distill_4step",
+          "required": true,
+          "type": "pid_checkpoint",
+          "description": "4-step distilled PiD decoder for 2048px output (4x from 512 latent)."
+        },
+        {
+          "name": "PiD 2K-to-4K Flux Checkpoint",
+          "url": "https://huggingface.co/nvidia/PiD/tree/main/checkpoints/PiD_res2kto4k_sr4x_official_flux_distill_4step",
+          "required": false,
+          "type": "pid_checkpoint",
+          "description": "4-step distilled PiD decoder for 4096px output (4x from 1024 latent)."
+        },
+        {
+          "name": "Flux VAE",
+          "url": "https://huggingface.co/nvidia/PiD/blob/main/checkpoints/ae.safetensors",
+          "required": false,
+          "type": "vae",
+          "description": "Flux1 VAE encoder weights. Optional fallback."
+        },
+        {
+          "name": "Flux Checkpoint",
+          "url": "https://huggingface.co/black-forest-labs/FLUX.1-dev",
+          "required": true,
+          "type": "checkpoint",
+          "description": "Flux.1-dev base model. Place in ComfyUI/models/checkpoints/"
+        }
+      ]
+    }
+  },
+  "version": 0.4
+}
