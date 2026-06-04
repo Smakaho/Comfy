@@ -16,13 +16,13 @@ Search for "ComfyUI-SEGA" in ComfyUI Manager and install.
 ### Method 2: Manual Install
 ```bash
 cd ComfyUI/custom_nodes/
-git clone https://github.com/YOUR_USERNAME/comfyui-sega.git
+git clone https://github.com/Smakaho/comfyui-sega.git
 ```
 
 ### Method 3: Graydient.AI Workflow Builder
 1. In your Graydient workflow, add this repo to the **Custom Nodes** field:
    ```
-   https://github.com/YOUR_USERNAME/comfyui-sega
+   https://github.com/Smakaho/comfyui-sega
    ```
 2. Check **Auto-install nodes**
 3. No PIP requirements needed — uses only PyTorch and standard libraries
