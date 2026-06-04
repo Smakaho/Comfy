@@ -22,7 +22,7 @@ git clone https://github.com/Smakaho/comfy/comfyui-sega.git
 ### Method 3: Graydient.AI Workflow Builder
 1. In your Graydient workflow, add this repo to the **Custom Nodes** field:
    ```
-   https://github.com/Smakaho/comfy/comfyui-sega
+   https://github.com/Smakaho/comfy
    ```
 2. Check **Auto-install nodes**
 3. No PIP requirements needed — uses only PyTorch and standard libraries
